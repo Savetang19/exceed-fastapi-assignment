@@ -59,12 +59,14 @@ def room_avaliable(room_id: int, start_date: str, end_date: str):
 
 @app.get("/reservation/by-name/{name}")
 def get_reservation_by_name(name: str):
+    """ This endpoint use for retrieve the details of the reservation by name of booker."""
     data = collection.find({"name": name}, {"_id": False})
     return {"result": list(data)}
 
 
 @app.get("/reservation/by-room/{room_id}")
 def get_reservation_by_room(room_id: int):
+    """ This endpoint use for retrieve all the reservation in that room."""
     if room_id not in range(1, 11):
         raise HTTPException(
             status_code=400, detail=f"room id: {room_id} does not exist."
@@ -75,6 +77,7 @@ def get_reservation_by_room(room_id: int):
 
 @app.post("/reservation")
 def reserve(reservation: Reservation):
+    """ This endpint use for make a reservation."""
     if reservation.room_id not in range(1, 11):
         raise HTTPException(
             status_code=400, detail=f"room id: {reservation.room_id} does not exist."
@@ -95,6 +98,7 @@ def reserve(reservation: Reservation):
 
 @app.put("/reservation/update")
 def update_reservation(reservation: Reservation, new_start_date: date = Body(), new_end_date: date = Body()):
+    """ This endpoint use for update the specific reservation."""
     if new_start_date > new_end_date:
         raise HTTPException(status_code=400, detail="Invalid date")
     if not room_avaliable(reservation.room_id, new_start_date.strftime(DATE_FORMAT), new_end_date.strftime(DATE_FORMAT)):
@@ -117,6 +121,7 @@ def update_reservation(reservation: Reservation, new_start_date: date = Body(), 
 
 @app.delete("/reservation/delete")
 def cancel_reservation(reservation: Reservation):
+    """ This endpoint use for cancel the specific reservation."""
     collection.delete_one(
         {
             "name": reservation.name,
