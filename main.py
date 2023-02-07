@@ -81,9 +81,7 @@ def reserve(reservation: Reservation):
         )
     if reservation.start_date > reservation.end_date:
         raise HTTPException(status_code=400, detail="Invalid date")
-    if not room_avaliable(
-        reservation.room_id, str(reservation.start_date), str(reservation.end_date)
-    ):
+    if not room_avaliable(reservation.room_id, reservation.start_date.strftime(DATE_FORMAT), reservation.end_date.strftime(DATE_FORMAT)):
         raise HTTPException(status_code=400, detail="This room is not available.")
     collection.insert_one(
         {
@@ -96,12 +94,10 @@ def reserve(reservation: Reservation):
 
 
 @app.put("/reservation/update")
-def update_reservation(
-    reservation: Reservation, new_start_date: date = Body(), new_end_date: date = Body()
-):
+def update_reservation(reservation: Reservation, new_start_date: date = Body(), new_end_date: date = Body()):
     if new_start_date > new_end_date:
         raise HTTPException(status_code=400, detail="Invalid date")
-    if not room_avaliable(reservation.room_id, str(new_start_date), str(new_end_date)):
+    if not room_avaliable(reservation.room_id, new_start_date.strftime(DATE_FORMAT), new_end_date.strftime(DATE_FORMAT)):
         raise HTTPException(status_code=400, detail="This room is not available.")
     collection.update_one(
         {
@@ -113,7 +109,7 @@ def update_reservation(
         {
             "$set": {
                 "start_date": new_start_date.strftime(DATE_FORMAT),
-                "end_date": new_end_date.strftime(DATABASE_NAME),
+                "end_date": new_end_date.strftime(DATE_FORMAT),
             }
         },
     )
